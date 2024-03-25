@@ -4,7 +4,15 @@ from datetime import datetime, timedelta
 import httpx
 
 
-def get_rate(currency: str, date: datetime = datetime.today()) -> tuple[float, datetime]:
+def list_all_currencies() -> list[str]:
+    url = "https://api.nbp.pl/api/exchangerates/tables/a/"
+    response = httpx.get(url)
+    response.raise_for_status()
+    currencies = [rate["code"] for rate in response.json()[0]["rates"]]
+    return currencies
+
+
+def get_rate(currency: str, date: datetime = datetime.today()) -> tuple[float, datetime, str]:
     while True:
         url = f"https://api.nbp.pl/api/exchangerates/rates/a/{currency}/{date.strftime("%Y-%m-%d")}"
         response = httpx.get(url)
@@ -15,7 +23,8 @@ def get_rate(currency: str, date: datetime = datetime.today()) -> tuple[float, d
         else:
             response.raise_for_status()
     mid = response.json()["rates"][0]["mid"]
-    return mid, date
+    table = response.json()["rates"][0]["no"]
+    return mid, date, table
 
 
 def parse_date(date: str) -> datetime:
@@ -27,14 +36,30 @@ def parse_date(date: str) -> datetime:
     return datetime(year=year, month=month, day=day)
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+def list_currencies():
+    all_currencies = list_all_currencies()
+    for cur in all_currencies:
+        print(cur)
+
+
+@cli.command()
 @click.argument("currency")
 @click.option("-d", "--date", "date")
-def main(currency: str, date: str):
+def get(currency: str, date: str):
+    """Gets rate for an invoice created at a given date.
+    It first looks at provided date minus 1 day, and then looks further back to the past
+    if the given currency rate wasn't published for that day.
+    """
     date = parse_date(date) if date else datetime.today()
-    rate, latest_available_date = get_rate(currency, date)
-    print(rate, latest_available_date.strftime("%Y-%m-%d"))
+    rate, latest_available_date, table_id = get_rate(currency, date - timedelta(days=1))
+    print(",".join((str(rate), latest_available_date.strftime("%Y-%m-%d"), table_id)))
 
 
 if __name__ == '__main__':
-    main()
+    cli()
