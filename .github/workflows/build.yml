@@ -20,12 +20,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Build .exe
-        run: |
-          pyinstaller -F src/rates.py
+        run: pyinstaller -F src/rates.py
       - name: Store .exe and .xlsx
         uses: actions/upload-artifact@v4
         with:
           name: rates_diff
           path: |
             "ROZNICE KURSOWE.xlsm"
-            "dist/rates.exe"
+            "dist\rates.exe"
