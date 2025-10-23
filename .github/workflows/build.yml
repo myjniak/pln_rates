@@ -5,17 +5,27 @@ on: [push]
 jobs:
   pyinstaller-build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+
     steps:
-      - name: Create Executable
-        uses: sayyid5416/pyinstaller@v1
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python_ver: '3.13'
-          spec: 'src/rates.py'
-          requirements: 'requirements.txt'
-          upload_exe_with_name: rates_diff
-          options: --onefile
-      - name: Store .xlsx
+          python-version: ${{ matrix.python-version }}
+      - name: Install Builder
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build .exe
+        run: |
+          pyinstaller -F src/rates.py
+      - name: Store .exe and .xlsx
         uses: actions/upload-artifact@v4
         with:
           name: rates_diff
-          path: "ROZNICE KURSOWE.xlsm"
+          path: |
+            "ROZNICE KURSOWE.xlsm"
+            "dist/rates.exe"
