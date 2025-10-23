@@ -26,5 +26,5 @@ jobs:
         with:
           name: rates_diff
           path: |
-            "ROZNICE KURSOWE.xlsm"
-            "dist\rates.exe"
+            dist\rates.exe"
+            ROZNICE KURSOWE.xlsm
