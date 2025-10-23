@@ -10,12 +10,12 @@ jobs:
         uses: sayyid5416/pyinstaller@v1
         with:
           python_ver: '3.13'
-          spec: 'src/download.py'
+          spec: 'src/rates.py'
           requirements: 'requirements.txt'
-          upload_exe_with_name: 'rates.exe'
+          upload_exe_with_name: rates_diff
           options: --onefile
       - name: Store .xlsx
         uses: actions/upload-artifact@v4
         with:
-          name: xlsx
+          name: rates_diff
           path: "ROZNICE KURSOWE.xlsm"
