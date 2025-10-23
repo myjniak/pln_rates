@@ -1,0 +1,16 @@
+name: CI
+
+on: [push]
+
+jobs:
+  pyinstaller-build:
+    runs-on: windows-latest
+    steps:
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
+        with:
+          python_ver: '3.13'
+          spec: 'src/download.py'
+          requirements: 'requirements.txt'
+          upload_exe_with_name: 'rates.exe'
+          options: --onefile
